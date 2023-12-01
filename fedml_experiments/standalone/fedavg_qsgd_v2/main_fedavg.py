@@ -89,6 +89,8 @@ def add_args(parser):
 
     parser.add_argument('--ci', type=int, default=0,
                         help='CI')
+    
+    # 变1
     parser.add_argument('--quantized_bits', type=int, default=32,
                         help='qsgd quantized bits')
     return parser
@@ -321,3 +323,4 @@ if __name__ == "__main__":
 
     fedavgAPI = FedAvgAPI(dataset, device, args, model_trainer)
     fedavgAPI.train()
+

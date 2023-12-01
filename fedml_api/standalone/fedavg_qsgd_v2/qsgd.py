@@ -1,5 +1,6 @@
 import torch
 
+# 变7
 def quantize(x, input_compress_settings={}):
     compress_settings = {'n': 6}
     compress_settings.update(input_compress_settings)
@@ -23,3 +24,4 @@ def quantize(x, input_compress_settings={}):
     Tilde_x = x_norm * sgn_x * xi
     
     return Tilde_x
+    

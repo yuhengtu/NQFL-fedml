@@ -7,6 +7,7 @@ import torch
 import wandb
 import pandas as pd
 
+# 变5
 from fedml_api.standalone.fedavg_qsgd_v2.client import Client
 
 
@@ -81,6 +82,7 @@ class FedAvgAPI(object):
             # update global weights
             # w_global = self._aggregate(w_locals)
             g_global = self._aggregate_g(g_locals)
+            
             # 更新全局模型
             self._update_global_model(w_global, g_global, self.args.lr)
             # 将server模型更新给client模型

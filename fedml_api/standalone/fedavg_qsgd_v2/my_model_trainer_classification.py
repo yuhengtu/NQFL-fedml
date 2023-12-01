@@ -24,6 +24,7 @@ class MyModelTrainer(ModelTrainer):
     def get_model_gradients(self):
         return self.grad_accum
     
+    # 变6
     def get_comm_bits(self, q):
         cb = 0
         for i in range(len(self.grad_accum)):
