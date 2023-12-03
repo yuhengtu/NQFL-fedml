@@ -7,8 +7,7 @@ import torch
 import wandb
 import pandas as pd
 
-# 变0
-from fedml_api.standalone.fedavg_qsgd_v2.client import Client
+from fedml_api.standalone.fedavg.client import Client
 
 
 class FedAvgAPI(object):
@@ -62,6 +61,7 @@ class FedAvgAPI(object):
                                                    self.args.client_num_per_round)
             logging.info("client_indexes = " + str(client_indexes))
 
+
             for idx, client in enumerate(self.client_list):
                 # update dataset
                 client_idx = client_indexes[idx]
@@ -77,12 +77,16 @@ class FedAvgAPI(object):
                 g_locals.append((client.get_sample_number(), copy.deepcopy(g)))
                 self.cb += cb
 
+                # Var_G[round_idx - 1, idx] = var_g
 
+            # self.R[round_idx], P[round_idx, :], nu_real[round_idx],  S_X[round_idx, :], M[round_idx, :] = RDfucntion(round_idx, sz_k, n, Var_S[round_idx-1], Var_G[round_idx-1, :], D[round_idx-1], S_X[round_idx-1, :], M[round_idx-1, :], G_global[round_idx-1], P[round_idx-1, :], Var_W)
+            # Var_S[round_idx] = Var_S[round_idx - 1] + Var_W
+            # G_global[round_idx] = np.abs(np.random.normal(0, Var_S[round_idx]))
 
             # update global weights
             # w_global = self._aggregate(w_locals)
             g_global = self._aggregate_g(g_locals)
-            
+
             # 更新全局模型
             self._update_global_model(w_global, g_global, self.args.lr)
             # 将server模型更新给client模型
@@ -150,7 +154,6 @@ class FedAvgAPI(object):
                     averaged_gradients[k] += local_model_gradients[k] * w
         return averaged_gradients
 
-    # 相比v1变，功能一样，加了not None判断
     def _update_global_model(self, model, gradients, lr):
         for i, k in enumerate(model.keys()):
             if model[k].grad != None:
@@ -225,7 +228,6 @@ class FedAvgAPI(object):
 
         # communication bits
 
-
         stats = {'training_acc': train_acc, 'training_loss': train_loss}
         wandb.log({"Train/Acc": train_acc, "round": round_idx})
         wandb.log({"Train/Loss": train_loss, "round": round_idx})
@@ -274,3 +276,4 @@ class FedAvgAPI(object):
             raise Exception("Unknown format to log metrics for dataset {}!" % self.args.dataset)
 
         logging.info(stats)
+

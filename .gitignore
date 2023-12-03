@@ -62,3 +62,6 @@ data/fednlp/*
 *.npz
 
 *.jpg
+
+test_qsgd.py
+nqfl_test.py

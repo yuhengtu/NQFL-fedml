@@ -5,11 +5,7 @@ from torch import nn
 from scipy.stats import norm
 import numpy as np
 
-try:
-    from fedml_core.trainer.model_trainer import ModelTrainer
-except ImportError:
-    from FedML.fedml_core.trainer.model_trainer import ModelTrainer
-
+from fedml_core.trainer.model_trainer import ModelTrainer
 
 class MyModelTrainer(ModelTrainer):
     def get_model_params(self):
@@ -24,13 +20,9 @@ class MyModelTrainer(ModelTrainer):
     def get_model_gradients(self):
         return self.grad_accum
     
-    # 变9
-    def get_comm_bits(self, q):
-        cb = 0
-        for i in range(len(self.grad_accum)):
-            d = self.grad_accum[i].reshape(-1).shape[0]
-            cur_cb = d * np.log2(q + 1) + d + 32
-            cb += cur_cb
+    def get_comm_bits(self):
+        vars = self.grad_total.var(0)
+        cb = 0.5 * torch.abs(torch.log2(vars[vars!=0])).sum().item() + 0.5 * np.log2(2 * np.pi * np.e) * vars.shape[0]
         return cb
     
 
@@ -42,25 +34,21 @@ class MyModelTrainer(ModelTrainer):
 
         # train and update
         criterion = nn.CrossEntropyLoss().to(device)
-        if args.client_optimizer == "sgd":
-            optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr)
-        else:
-            optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr,
-                                         weight_decay=args.wd, amsgrad=True)
+        optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr)
         
         epoch_loss = []
         # 初始化梯度累积的存储
         self.grad_accum = []
         # 每轮epoch的梯度
         grad_epoch = []
-        # 变10
-        for param in self.model.parameters():
-            self.grad_accum.append(torch.zeros_like(param.data, device=device))
-            grad_epoch.append(torch.zeros_like(param.data, device=device))
+        parameters = self.get_model_params_cuda(device)
+        for k, v in parameters.items():
+            self.grad_accum.append(torch.zeros_like(v.data, device=device))
+            grad_epoch.append(torch.zeros_like(v.data, device=device))
         
         # 所有轮的梯度
         self.grad_total = None
-
+        
         for epoch in range(args.epochs):
             batch_loss = []
             for t in grad_epoch:
@@ -74,10 +62,10 @@ class MyModelTrainer(ModelTrainer):
                 loss.backward()
 
                 # 梯度累积
-                # 变11
-                for i in range(len(list(self.model.parameters()))):
-                    self.grad_accum[i].add_(list(self.model.parameters())[i].grad.data)
-                    grad_epoch[i].add_(list(self.model.parameters())[i].grad.data)
+                for i, k in enumerate(parameters.keys()):
+                    # self.grad_accum[i].add_(list(self.model.parameters())[i].grad.data)
+                    if parameters[k].grad != None:
+                        grad_epoch[i].add_(parameters[k].grad.data)
             
                 # Uncommet this following line to avoid nan loss
                 # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
@@ -95,13 +83,13 @@ class MyModelTrainer(ModelTrainer):
                 #            100. * (batch_idx + 1) / len(train_data), loss.item()))
                 batch_loss.append(loss.item())
             
-            # 变12
-            for i in range(len(list(self.model.parameters()))):
-                grad_epoch[i].div_(len(train_data))
+            for i, k in enumerate(parameters.keys()):
+                if parameters[k].grad != None:
+                    grad_epoch[i].div_(len(train_data))
+                    self.grad_accum[i].add_(grad_epoch[i].data)
             
             grad_cur = grad_epoch[0].reshape(-1)
-            #变13
-            for i in range(1, len(list(self.model.parameters()))):
+            for i in range(1, len(parameters.keys())):
                 grad_cur = torch.cat((grad_cur, grad_epoch[i].reshape(-1)))
             if self.grad_total is None:
                 self.grad_total = grad_cur.unsqueeze(0)
@@ -143,4 +131,5 @@ class MyModelTrainer(ModelTrainer):
 
     def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None) -> bool:
         return False
+
 

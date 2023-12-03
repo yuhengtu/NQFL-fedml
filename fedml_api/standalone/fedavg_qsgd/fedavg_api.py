@@ -7,6 +7,7 @@ import torch
 import wandb
 import pandas as pd
 
+# 变7
 from fedml_api.standalone.fedavg_qsgd.client import Client
 
 
@@ -149,6 +150,7 @@ class FedAvgAPI(object):
         return averaged_gradients
 
     def _update_global_model(self, model, gradients, lr):
+        # 变8
         keys = list(model.keys())
         for i in range(len(keys)):
             model[keys[i]].data.add_(-lr, gradients[i].data)

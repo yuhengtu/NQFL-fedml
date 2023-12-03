@@ -21,9 +21,9 @@ class MyModelTrainer(ModelTrainer):
         model.train()
 
         # train and update
-        criterion = nn.BCELoss(reduction='sum').to(device)
+        criterion = nn.CrossEntropyLoss().to(device)
         if args.client_optimizer == "sgd":
-            optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr)
+            optimizer = torch.optim.SGD(self.model.parameters(), lr=args.lr)
         else:
             optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr,
                                          weight_decay=args.wd, amsgrad=True)
@@ -66,13 +66,7 @@ class MyModelTrainer(ModelTrainer):
             'test_total': 0
         }
 
-        '''
-        stackoverflow_lr is the task of multi-label classification
-        please refer to following links for detailed explainations on cross-entropy and corresponding implementation of tff research:
-        https://towardsdatascience.com/cross-entropy-for-classification-d98e7f974451
-        https://github.com/google-research/federated/blob/49a43456aa5eaee3e1749855eed89c0087983541/optimization/stackoverflow_lr/federated_stackoverflow_lr.py#L131
-        '''
-        criterion = nn.BCELoss(reduction='sum').to(device)
+        criterion = nn.CrossEntropyLoss().to(device)
 
         with torch.no_grad():
             for batch_idx, (x, target) in enumerate(test_data):
@@ -81,20 +75,18 @@ class MyModelTrainer(ModelTrainer):
                 pred = model(x)
                 loss = criterion(pred, target)
 
-                predicted = (pred > .5).int()
-                correct = predicted.eq(target).sum(axis=-1).eq(target.size(1)).sum()
-                true_positive = ((target * predicted) > .1).int().sum(axis=-1)
-                precision = true_positive / (predicted.sum(axis=-1) + 1e-13)
-                recall = true_positive / (target.sum(axis=-1) + 1e-13)
-                metrics['test_precision'] += precision.sum().item()
-                metrics['test_recall'] += recall.sum().item()
+                _, predicted = torch.max(pred, 1)
+                correct = predicted.eq(target).sum()
+
                 metrics['test_correct'] += correct.item()
                 metrics['test_loss'] += loss.item() * target.size(0)
-                metrics['test_total'] += target.size(0)
 
+                if len(target.size()) == 1:  #
+                    metrics['test_total'] += target.size(0)
+                elif len(target.size()) == 2:  # for tasks of next word prediction
+                    metrics['test_total'] += target.size(0) * target.size(1)
         return metrics
 
     def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None) -> bool:
         return False
-
 

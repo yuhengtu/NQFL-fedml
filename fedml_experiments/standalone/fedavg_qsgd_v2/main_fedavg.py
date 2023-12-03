@@ -31,6 +31,7 @@ from fedml_api.data_preprocessing.MNIST.data_loader import load_partition_data_m
 from fedml_api.model.linear.lr import LogisticRegression
 from fedml_api.model.cv.resnet_gn import resnet18
 
+# 变0
 from fedml_api.standalone.fedavg_qsgd_v2.fedavg_api import FedAvgAPI
 from fedml_api.standalone.fedavg_qsgd_v2.my_model_trainer_classification import MyModelTrainer as MyModelTrainerCLS
 from fedml_api.standalone.fedavg_qsgd_v2.my_model_trainer_nwp import MyModelTrainer as MyModelTrainerNWP
@@ -90,7 +91,7 @@ def add_args(parser):
     parser.add_argument('--ci', type=int, default=0,
                         help='CI')
     
-    # 变1
+    # 变0
     parser.add_argument('--quantized_bits', type=int, default=32,
                         help='qsgd quantized bits')
     return parser
@@ -296,6 +297,7 @@ if __name__ == "__main__":
 
     wandb.init(
         project="fedml",
+        # 变0
         name="FedAVG_qsgd-r" + str(args.comm_round) + "-e" + str(args.epochs) + "-lr" + str(args.lr) + "-bit" + str(args.quantized_bits) 
         + "-dataset_" + str(args.dataset) + "-model_" + str(args.model) + "-dist_" + ("noniid" if str(args.partition_method)=='hetero' else 'iid'),
         config=args

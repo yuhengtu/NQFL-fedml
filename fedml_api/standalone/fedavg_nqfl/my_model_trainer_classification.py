@@ -24,9 +24,15 @@ class MyModelTrainer(ModelTrainer):
     def get_model_gradients(self):
         return self.grad_accum
     
-    def get_comm_bits(self):
-        vars = self.grad_total.var(0)
-        cb = 0.5 * torch.abs(torch.log2(vars[vars!=0])).sum().item() + 0.5 * np.log2(2 * np.pi * np.e) * vars.shape[0]
+    # 变3
+    def get_comm_bits(self, q):
+        cb = 0
+        for i in range(len(self.grad_accum)):
+            d = self.grad_accum[i].reshape(-1).shape[0]
+        # reshape为一维数组，然后获取其长度
+            cur_cb = d * q + d + 32 + 32  # +d是符号位
+
+            cb += cur_cb
         return cb
     
 
@@ -56,7 +62,7 @@ class MyModelTrainer(ModelTrainer):
         
         # 所有轮的梯度
         self.grad_total = None
-        
+
         for epoch in range(args.epochs):
             batch_loss = []
             for t in grad_epoch:
@@ -139,5 +145,4 @@ class MyModelTrainer(ModelTrainer):
 
     def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None) -> bool:
         return False
-
 

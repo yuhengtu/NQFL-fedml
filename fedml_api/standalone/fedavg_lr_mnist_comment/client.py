@@ -1,9 +1,5 @@
 import logging
 
-# 变0
-from fedml_api.standalone.fedavg_qsgd_v2.qsgd import *
-
-
 class Client:
 
     def __init__(self, client_idx, local_training_data, local_test_data, local_sample_number, args, device,
@@ -25,17 +21,6 @@ class Client:
         self.local_test_data = local_test_data
         self.local_sample_number = local_sample_number
 
-    # 变1
-    def qsgd_quantize(self, gradients, q):
-        q_gradients = []
-        for i in range(len(gradients)):
-            quantized_g = quantize(gradients[i], {'n': q})
-            q_gradients.append(quantized_g)
-        print(f'-----------------{q_gradients}-----------------------------')
-        return q_gradients
-
-    
-
     def get_sample_number(self):
         return self.local_sample_number
 
@@ -45,10 +30,8 @@ class Client:
         self.model_trainer.train(self.local_training_data, self.device, self.args)
         # weights = self.model_trainer.get_model_params()
         gradients = self.model_trainer.get_model_gradients()
-        # 变2
-        q_gradients = self.qsgd_quantize(gradients, self.args.quantized_bits)
-        communication_bits = self.model_trainer.get_comm_bits(self.args.quantized_bits)
-        return q_gradients, communication_bits
+        communication_bits = self.model_trainer.get_comm_bits()
+        return gradients, communication_bits
 
     def local_test(self, b_use_test_dataset):
         if b_use_test_dataset:

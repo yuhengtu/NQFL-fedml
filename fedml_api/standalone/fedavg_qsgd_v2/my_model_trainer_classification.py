@@ -24,12 +24,16 @@ class MyModelTrainer(ModelTrainer):
     def get_model_gradients(self):
         return self.grad_accum
     
-    # 变6
+    # 变3
     def get_comm_bits(self, q):
         cb = 0
         for i in range(len(self.grad_accum)):
             d = self.grad_accum[i].reshape(-1).shape[0]
-            cur_cb = d * np.log2( int(2**q) + 1 + 1) + d + 32  #这里也改了总的码字数
+        # reshape为一维数组，然后获取其长度
+            # 相比v1变
+            # cur_cb = d * np.log2( int(2**q) + 1 + 1) + d + 32    #这里也改了总的码字数
+            cur_cb = d * q + d + 32  # +d是符号位
+
             cb += cur_cb
         return cb
     
@@ -53,6 +57,7 @@ class MyModelTrainer(ModelTrainer):
         self.grad_accum = []
         # 每轮epoch的梯度
         grad_epoch = []
+        # 相比v1变
         parameters = self.get_model_params_cuda(device)
         for k, v in parameters.items():
             self.grad_accum.append(torch.zeros_like(v.data, device=device))
@@ -74,6 +79,7 @@ class MyModelTrainer(ModelTrainer):
                 loss.backward()
 
                 # 梯度累积
+                # 相比v1变
                 for i, k in enumerate(parameters.keys()):
                     # self.grad_accum[i].add_(list(self.model.parameters())[i].grad.data)
                     if parameters[k].grad != None:
@@ -95,12 +101,14 @@ class MyModelTrainer(ModelTrainer):
                 #            100. * (batch_idx + 1) / len(train_data), loss.item()))
                 batch_loss.append(loss.item())
             
+            # 相比v1变
             for i, k in enumerate(parameters.keys()):
                 if parameters[k].grad != None:
                     grad_epoch[i].div_(len(train_data))
                     self.grad_accum[i].add_(grad_epoch[i].data)
             
             grad_cur = grad_epoch[0].reshape(-1)
+            # 相比v1变
             for i in range(1, len(parameters.keys())):
                 grad_cur = torch.cat((grad_cur, grad_epoch[i].reshape(-1)))
             if self.grad_total is None:

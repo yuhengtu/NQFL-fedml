@@ -1,5 +1,7 @@
 import logging
 
+# 变0
+from fedml_api.standalone.fedavg_nqfl.nqfl_quant import *
 
 
 class Client:
@@ -23,6 +25,16 @@ class Client:
         self.local_test_data = local_test_data
         self.local_sample_number = local_sample_number
 
+    # 变1
+    def nqfl_quantize(self, gradients, q):
+        q_gradients = []
+        for i in range(len(gradients)):
+            quantized_g = quantize(gradients[i], {'n': q})
+            q_gradients.append(quantized_g)
+        return q_gradients
+
+    
+
     def get_sample_number(self):
         return self.local_sample_number
 
@@ -32,8 +44,10 @@ class Client:
         self.model_trainer.train(self.local_training_data, self.device, self.args)
         # weights = self.model_trainer.get_model_params()
         gradients = self.model_trainer.get_model_gradients()
-        communication_bits = self.model_trainer.get_comm_bits()
-        return gradients, communication_bits
+        # 变2
+        q_gradients = self.nqfl_quantize(gradients, self.args.quantized_bits)
+        communication_bits = self.model_trainer.get_comm_bits(self.args.quantized_bits)
+        return q_gradients, communication_bits
 
     def local_test(self, b_use_test_dataset):
         if b_use_test_dataset:
