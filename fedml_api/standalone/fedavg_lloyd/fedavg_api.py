@@ -7,7 +7,9 @@ import torch
 import wandb
 import pandas as pd
 
-from fedml_api.standalone.fedavg_lr_mnist_comment.client import Client
+# 变0
+from fedml_api.standalone.fedavg_nqfl.client import Client
+
 
 class FedAvgAPI(object):
     def __init__(self, dataset, device, args, model_trainer):
@@ -39,10 +41,12 @@ class FedAvgAPI(object):
 
     def train(self):
         self.args.frequency_of_the_test = 1
+        # w_global = self.model_trainer.get_model_params()
         w_global = self.model_trainer.get_model_params_cuda(self.device)
 
         self.cb = 0
 
+        # print('*'*20, w_global[w_global.keys()[0]].device)
         for round_idx in range(1, self.args.comm_round + 1):
 
             logging.info("################Communication round : {}".format(round_idx))
@@ -57,7 +61,6 @@ class FedAvgAPI(object):
             client_indexes = self._client_sampling(round_idx, self.args.client_num_in_total,
                                                    self.args.client_num_per_round)
             logging.info("client_indexes = " + str(client_indexes))
-
 
             for idx, client in enumerate(self.client_list):
                 # update dataset
@@ -74,10 +77,11 @@ class FedAvgAPI(object):
                 g_locals.append((client.get_sample_number(), copy.deepcopy(g)))
                 self.cb += cb
 
+
+
             # update global weights
             # w_global = self._aggregate(w_locals)
             g_global = self._aggregate_g(g_locals)
-
             # 更新全局模型
             self._update_global_model(w_global, g_global, self.args.lr)
             # 将server模型更新给client模型
@@ -146,9 +150,14 @@ class FedAvgAPI(object):
         return averaged_gradients
 
     def _update_global_model(self, model, gradients, lr):
-        for i, k in enumerate(model.keys()):
-            if model[k].grad != None:
-                model[k].data.add_(-lr, gradients[i].data)
+        # 变3
+        # for i, k in enumerate(model.keys()):
+        #     if model[k].grad != None:
+        #         model[k].data.add_(-lr, gradients[i].data)
+        keys = list(model.keys())
+        for i in range(len(keys)):
+            model[keys[i]].data.add_(-lr, gradients[i].data)
+            # model[k].data = model[k].data - lr * gradients[i].data，原地操作
 
     def _get_grad_global_statistics(self, g_locals):
         g_total = None
@@ -219,6 +228,7 @@ class FedAvgAPI(object):
 
         # communication bits
 
+
         stats = {'training_acc': train_acc, 'training_loss': train_loss}
         wandb.log({"Train/Acc": train_acc, "round": round_idx})
         wandb.log({"Train/Loss": train_loss, "round": round_idx})
@@ -267,4 +277,3 @@ class FedAvgAPI(object):
             raise Exception("Unknown format to log metrics for dataset {}!" % self.args.dataset)
 
         logging.info(stats)
-

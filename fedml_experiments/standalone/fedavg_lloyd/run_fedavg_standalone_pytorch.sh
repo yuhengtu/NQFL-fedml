@@ -26,6 +26,8 @@ OPT=${12}
 
 CI=${13}
 
+BITS=${14}
+
 python3 ./main_fedavg.py \
 --gpu $GPU \
 --dataset $DATASET \
@@ -39,6 +41,14 @@ python3 ./main_fedavg.py \
 --batch_size $BATCH_SIZE \
 --client_optimizer $OPT \
 --lr $LR \
---ci $CI
+--ci $CI \
+--quantized_bits $BITS
 
-# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist lr hetero 10 5 0.03 sgd 0 > ./fedavg_standalone.txt 2>&1 &
+# debug
+# sh run_fedavg_standalone_pytorch.sh 0 1000 10 10 mnist ./../../../data/mnist lr hetero 200 1 0.03 sgd 0 6
+
+# train
+# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist lr hetero 200 20 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &
+
+# cnn_mnist
+# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist cnn hetero 200 20 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &
