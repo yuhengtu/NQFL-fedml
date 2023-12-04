@@ -49,6 +49,7 @@ python3 ./main_fedavg.py \
 
 # train
 # nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist lr hetero 200 20 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &
+# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist lr hetero 1000 5 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &
 
 # cnn_mnist
 # nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist cnn hetero 200 20 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &

@@ -40,3 +40,5 @@ python3 ./main_fedavg.py \
 --client_optimizer $OPT \
 --lr $LR \
 --ci $CI
+
+# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist lr hetero 10 5 0.03 sgd 0 > ./fedavg_standalone.txt 2>&1 &

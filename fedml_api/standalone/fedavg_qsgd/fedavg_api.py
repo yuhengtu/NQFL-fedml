@@ -10,7 +10,6 @@ import pandas as pd
 # 变0
 from fedml_api.standalone.fedavg_qsgd.client import Client
 
-
 class FedAvgAPI(object):
     def __init__(self, dataset, device, args, model_trainer):
         self.device = device
@@ -39,6 +38,10 @@ class FedAvgAPI(object):
             self.client_list.append(c)
         logging.info("############setup_clients (END)#############")
 
+
+
+
+
     def train(self):
         self.args.frequency_of_the_test = 1
         # w_global = self.model_trainer.get_model_params()
@@ -50,42 +53,44 @@ class FedAvgAPI(object):
         for round_idx in range(1, self.args.comm_round + 1):
 
             logging.info("################Communication round : {}".format(round_idx))
-
             w_locals = []
             g_locals = []
 
             """
             for scalability: following the original FedAvg algorithm, we uniformly sample a fraction of clients in each round.
             Instead of changing the 'Client' instances, our implementation keeps the 'Client' instances and then updates their local dataset 
+            每一轮的客户端相同，但是其中的数据不同，达到每一轮抽取不同客户端的效果
             """
+
             client_indexes = self._client_sampling(round_idx, self.args.client_num_in_total,
                                                    self.args.client_num_per_round)
             logging.info("client_indexes = " + str(client_indexes))
 
+
+
             for idx, client in enumerate(self.client_list):
-                # update dataset
+                # 根据 client_idx 更新其本地数据集
                 client_idx = client_indexes[idx]
                 client.update_local_dataset(client_idx, self.train_data_local_dict[client_idx],
                                             self.test_data_local_dict[client_idx],
                                             self.train_data_local_num_dict[client_idx])
 
-                # train on new dataset
-                # w = client.train(copy.deepcopy(w_global))
                 g, cb = client.train(copy.deepcopy(w_global))
-                # self.logger.info("local weights = " + str(w))
-                # w_locals.append((client.get_sample_number(), copy.deepcopy(w)))
                 g_locals.append((client.get_sample_number(), copy.deepcopy(g)))
+                # g_locals列表，元素为tuple：(client的sample_number, 该client的g)
                 self.cb += cb
 
 
 
             # update global weights
-            # w_global = self._aggregate(w_locals)
             g_global = self._aggregate_g(g_locals)
+
             # 更新全局模型
             self._update_global_model(w_global, g_global, self.args.lr)
             # 将server模型更新给client模型
             self.model_trainer.set_model_params(w_global)
+
+
 
             # test results
             # at last round
@@ -97,6 +102,10 @@ class FedAvgAPI(object):
                     self._local_test_on_validation_set(round_idx)
                 else:
                     self._local_test_on_all_clients(round_idx)
+
+
+
+
 
     def _client_sampling(self, round_idx, client_num_in_total, client_num_per_round):
         if client_num_in_total == client_num_per_round:

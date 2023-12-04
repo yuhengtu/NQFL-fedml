@@ -9,16 +9,19 @@ from fedml_core.trainer.model_trainer import ModelTrainer
 
 class MyModelTrainer(ModelTrainer):
     def get_model_params(self):
+        # 获取模型的参数字典，键是参数的名称，值是对应参数的张量。
         return self.model.cpu().state_dict()
-        # 返回模型的参数字典，键是参数的名称，值是对应参数的张量。
     
     def get_model_params_cuda(self, device):
+        # 获取模型参数并将其移动到指定设备（GPU或CPU）
         return self.model.to(device).state_dict()
 
     def set_model_params(self, model_parameters):
+        # 设置模型的参数
         self.model.load_state_dict(model_parameters)
     
     def get_model_gradients(self):
+        # 获取模型的梯度累积
         return self.grad_accum
     
     def get_comm_bits(self):
@@ -27,7 +30,6 @@ class MyModelTrainer(ModelTrainer):
         # .item() 只包含一个元素的tensor转换为数值类型
         return cb
     
-
     def train(self, train_data, device, args):
         model = self.model
 
@@ -124,5 +126,3 @@ class MyModelTrainer(ModelTrainer):
 
     def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None) -> bool:
         return False
-
-

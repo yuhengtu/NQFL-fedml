@@ -7,8 +7,7 @@ import torch
 import wandb
 import pandas as pd
 
-from fedml_api.standalone.fedavg.client import Client
-
+from fedml_api.standalone.fedavg_lr_mnist_comment.client import Client
 
 class FedAvgAPI(object):
     def __init__(self, dataset, device, args, model_trainer):
@@ -40,12 +39,10 @@ class FedAvgAPI(object):
 
     def train(self):
         self.args.frequency_of_the_test = 1
-        # w_global = self.model_trainer.get_model_params()
         w_global = self.model_trainer.get_model_params_cuda(self.device)
 
         self.cb = 0
 
-        # print('*'*20, w_global[w_global.keys()[0]].device)
         for round_idx in range(1, self.args.comm_round + 1):
 
             logging.info("################Communication round : {}".format(round_idx))

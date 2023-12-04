@@ -13,8 +13,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../../../")))
 from fedml_api.data_preprocessing.MNIST.data_loader import load_partition_data_mnist
 from fedml_api.model.linear.lr import LogisticRegression
 
-from fedml_api.standalone.fedavg.fedavg_api import FedAvgAPI
-from fedml_api.standalone.fedavg.my_model_trainer_classification import MyModelTrainer as MyModelTrainerCLS
+from fedml_api.standalone.fedavg_lr_mnist_comment.fedavg_api import FedAvgAPI
+from fedml_api.standalone.fedavg_lr_mnist_comment.my_model_trainer_classification import MyModelTrainer as MyModelTrainerCLS
 
 def add_args(parser):
     """
