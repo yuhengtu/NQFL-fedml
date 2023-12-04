@@ -2,9 +2,9 @@
 
 GPU=$1
 
-CLIENT_NUM=$2 #客户端的数量
+CLIENT_NUM=$2
 
-WORKER_NUM=$3 #每轮参与训练的客户端数量
+WORKER_NUM=$3
 
 BATCH_SIZE=$4
 
@@ -14,19 +14,19 @@ DATA_PATH=$6
 
 MODEL=$7
 
-DISTRIBUTION=$8 #客户端数据的划分方式，比如"hetero"表示异构划分
+DISTRIBUTION=$8
 
-ROUND=$9 #训练的总轮数
+ROUND=$9
 
-EPOCH=${10} #每个客户端在每轮训练中运行的epoch数
+EPOCH=${10}
 
-LR=${11} #学习率
+LR=${11}
 
 OPT=${12}
 
-CI=${13} #是否进行联邦学习中的交叉迭代（cross iteration）
+CI=${13}
 
-BITS=${14} #量化位数，表示是否对梯度进行量化
+BITS=${14}
 
 python3 ./main_fedavg.py \
 --gpu $GPU \
@@ -45,7 +45,10 @@ python3 ./main_fedavg.py \
 --quantized_bits $BITS
 
 # debug
-# sh run_fedavg_standalone_pytorch.sh 0 1000 10 10 mnist ./../../../data/mnist lr hetero 200 1 0.03 sgd 0 8
+# sh run_fedavg_standalone_pytorch.sh 0 1000 10 10 mnist ./../../../data/mnist lr hetero 200 1 0.03 sgd 0 6
 
 # train
-# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist lr hetero 200 20 0.03 sgd 0 8 > ./fedavg_standalone.txt 2>&1 &
+# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist lr hetero 200 20 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &
+
+# cnn_mnist
+# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 mnist ./../../../data/mnist cnn hetero 200 20 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &

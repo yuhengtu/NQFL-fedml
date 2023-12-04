@@ -68,7 +68,6 @@ Please make sure to run on the background when you start training after debuggin
 # MNIST
 nohup sh run_fedavg_standalone_pytorch.sh 2 10 10 10 mnist ./../../../data/mnist lr hetero 200 20 0.03 sgd 0 > ./fedavg_standalone.txt 2>&1 &
 ```
-sh run_fedavg_standalone_pytorch.sh 0 1000 10 10 mnist ./../../../data/mnist lr hetero 200 1 0.03 sgd 0
 
 For large DNNs (ResNet, Transformer, etc), please use the distributed computing (fedml_api/distributed). 
 

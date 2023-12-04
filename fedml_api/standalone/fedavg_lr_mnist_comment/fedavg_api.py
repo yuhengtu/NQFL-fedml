@@ -77,12 +77,6 @@ class FedAvgAPI(object):
                 g_locals.append((client.get_sample_number(), copy.deepcopy(g)))
                 self.cb += cb
 
-                # Var_G[round_idx - 1, idx] = var_g
-
-            # self.R[round_idx], P[round_idx, :], nu_real[round_idx],  S_X[round_idx, :], M[round_idx, :] = RDfucntion(round_idx, sz_k, n, Var_S[round_idx-1], Var_G[round_idx-1, :], D[round_idx-1], S_X[round_idx-1, :], M[round_idx-1, :], G_global[round_idx-1], P[round_idx-1, :], Var_W)
-            # Var_S[round_idx] = Var_S[round_idx - 1] + Var_W
-            # G_global[round_idx] = np.abs(np.random.normal(0, Var_S[round_idx]))
-
             # update global weights
             # w_global = self._aggregate(w_locals)
             g_global = self._aggregate_g(g_locals)

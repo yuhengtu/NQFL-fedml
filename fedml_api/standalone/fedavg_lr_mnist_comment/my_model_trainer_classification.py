@@ -10,6 +10,7 @@ from fedml_core.trainer.model_trainer import ModelTrainer
 class MyModelTrainer(ModelTrainer):
     def get_model_params(self):
         return self.model.cpu().state_dict()
+        # 返回模型的参数字典，键是参数的名称，值是对应参数的张量。
     
     def get_model_params_cuda(self, device):
         return self.model.to(device).state_dict()
@@ -21,8 +22,9 @@ class MyModelTrainer(ModelTrainer):
         return self.grad_accum
     
     def get_comm_bits(self):
-        vars = self.grad_total.var(0)
+        vars = self.grad_total.var(0) # 梯度的方差，维度0
         cb = 0.5 * torch.abs(torch.log2(vars[vars!=0])).sum().item() + 0.5 * np.log2(2 * np.pi * np.e) * vars.shape[0]
+        # .item() 只包含一个元素的tensor转换为数值类型
         return cb
     
 
@@ -37,12 +39,14 @@ class MyModelTrainer(ModelTrainer):
         optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr)
         
         epoch_loss = []
-        # 初始化梯度累积的存储
+        # grad_accum，存储每个模型参数对应的，每个 batch 梯度的累积值
         self.grad_accum = []
-        # 每轮epoch的梯度
+
+        # grad_epoch，存储每个模型参数对应的，每轮 epoch 的梯度
         grad_epoch = []
         parameters = self.get_model_params_cuda(device)
-        for k, v in parameters.items():
+        for k, v in parameters.items(): #key，value
+            # 为每个模型参数创建两个空张量
             self.grad_accum.append(torch.zeros_like(v.data, device=device))
             grad_epoch.append(torch.zeros_like(v.data, device=device))
         
@@ -58,7 +62,6 @@ class MyModelTrainer(ModelTrainer):
                 model.zero_grad()
                 log_probs = model(x)
                 loss = criterion(log_probs, labels)
-                # x.requires_grad = True
                 loss.backward()
 
                 # 梯度累积
@@ -71,16 +74,6 @@ class MyModelTrainer(ModelTrainer):
                 # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
                 optimizer.step()
-                # for group in optimizer.param_groups:
-                #     for p in group['params']:
-                #         if p.grad is None:
-                #             continue
-                #         d_p = p.grad.data
-                #         p.data.add_(-group['lr'], d_p)
-
-                # logging.info('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                #     epoch, (batch_idx + 1) * args.batch_size, len(train_data) * args.batch_size,
-                #            100. * (batch_idx + 1) / len(train_data), loss.item()))
                 batch_loss.append(loss.item())
             
             for i, k in enumerate(parameters.keys()):

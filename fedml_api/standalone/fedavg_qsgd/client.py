@@ -31,7 +31,7 @@ class Client:
         q_gradients = []
         print(f'-----------------gradients:{gradients}-----------------------------')
         print(f'-----------------gradients[0].shape:{gradients[0].shape}-----------------------------')
-        np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
+        # np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
         # 权重的梯度
         # [10， 784]，（lr模型，28^2 = 784个参数）
         # 输入特征的维度为 n，输出特征的维度为 m，则该层的参数矩阵的形状为 (m,n)
@@ -48,7 +48,7 @@ class Client:
             q_gradients.append(quantized_g)
         print(f'-----------------q_gradients:{q_gradients}-----------------------------')
         print(f'-----------------q_gradients[0].shape:{q_gradients[0].shape}-----------------------------')
-        np.savetxt('q_gradients_0.txt', q_gradients[0].cpu().numpy())
+        # np.savetxt('q_gradients_0.txt', q_gradients[0].cpu().numpy())
         print(f'-----------------q_gradients[1].shape:{q_gradients[1].shape}-----------------------------')
 
         return q_gradients
@@ -64,7 +64,7 @@ class Client:
         self.model_trainer.train(self.local_training_data, self.device, self.args)
         # weights = self.model_trainer.get_model_params()
         gradients = self.model_trainer.get_model_gradients()
-        # 变6
+        # 变2
         q_gradients = self.qsgd_quantize(gradients, self.args.quantized_bits)
         communication_bits = self.model_trainer.get_comm_bits(self.args.quantized_bits)
         return q_gradients, communication_bits

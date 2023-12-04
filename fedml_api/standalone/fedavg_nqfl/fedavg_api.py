@@ -82,7 +82,6 @@ class FedAvgAPI(object):
             # update global weights
             # w_global = self._aggregate(w_locals)
             g_global = self._aggregate_g(g_locals)
-            
             # 更新全局模型
             self._update_global_model(w_global, g_global, self.args.lr)
             # 将server模型更新给client模型
@@ -151,9 +150,14 @@ class FedAvgAPI(object):
         return averaged_gradients
 
     def _update_global_model(self, model, gradients, lr):
-        for i, k in enumerate(model.keys()):
-            if model[k].grad != None:
-                model[k].data.add_(-lr, gradients[i].data)
+        # 变3
+        # for i, k in enumerate(model.keys()):
+        #     if model[k].grad != None:
+        #         model[k].data.add_(-lr, gradients[i].data)
+        keys = list(model.keys())
+        for i in range(len(keys)):
+            model[keys[i]].data.add_(-lr, gradients[i].data)
+            # model[k].data = model[k].data - lr * gradients[i].data，原地操作
 
     def _get_grad_global_statistics(self, g_locals):
         g_total = None

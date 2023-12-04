@@ -297,9 +297,9 @@ if __name__ == "__main__":
 
     wandb.init(
         project="fedml",
-        # 变0
-        name="FedAVG_nqfl-r" + str(args.comm_round) + "-e" + str(args.epochs) + "-lr" + str(args.lr) + "-bit" + str(args.quantized_bits) 
-        + "-dataset_" + str(args.dataset) + "-model_" + str(args.model) + "-dist_" + ("noniid" if str(args.partition_method)=='hetero' else 'iid'),
+    #变0
+        name="FedAVG_nqfl-r" + str(args.comm_round) + "-e" + str(args.epochs) + 
+        "-lr" + str(args.lr) + "-bit" + str(args.quantized_bits) + "-" + str(args.dataset) + "-" + ("iid" if args.partition_method=='homo' else "noniid"),
         config=args
     )
 
@@ -325,4 +325,3 @@ if __name__ == "__main__":
 
     fedavgAPI = FedAvgAPI(dataset, device, args, model_trainer)
     fedavgAPI.train()
-

@@ -27,19 +27,63 @@ def quantize(g_vec, input_compress_settings={}):
     n =  compress_settings['n']
     
     list_name_t = f"{n}_bit_t"
-    t = t_dict[list_name_t]
+    t = torch.tensor(t_dict[list_name_t]).cuda()
 
     list_name_x = f"{n}_bit_x"
-    x = x_dict[list_name_x]
+    x = torch.tensor(x_dict[list_name_x]).cuda()
 
-    g_vec = g_vec.float()
+    g_vec = g_vec.float().cuda()
     mean = torch.mean(g_vec)
     std = torch.std(g_vec)
     normalized_g_vec = (g_vec - mean) / std
-    
-    q_norm_g_vec = [estimate(t, x, value) for value in normalized_g_vec]
+
+    q_norm_g_vec = torch.zeros_like(normalized_g_vec).cuda()
+    if q_norm_g_vec.dim() == 1:
+        q_norm_g_vec = torch.tensor([estimate(t, x, value) for value in normalized_g_vec]).cuda()
+    elif q_norm_g_vec.dim() == 2:    
+        q_norm_g_vec[0] = torch.tensor([estimate(t, x, value) for value in normalized_g_vec[0]]).cuda()
+        q_norm_g_vec[1] = torch.tensor([estimate(t, x, value) for value in normalized_g_vec[1]]).cuda()
 
     q_g_vec = q_norm_g_vec * std + mean
     
     return q_g_vec
+
+
+
+
+
+
+
+
+
+
+
+# t的长度比x少1
+# def estimate(t, x, value):
+#     for i in range(len(t)):
+#         if t[i] > value:
+#             return x[i]
+#     return x[-1]
+
+# def quantize(g_vec, input_compress_settings={}):
+#     compress_settings = {'n': 6} # 默认的压缩参数 6 bit
+#     compress_settings.update(input_compress_settings)
+#     n =  compress_settings['n']
+    
+#     list_name_t = f"{n}_bit_t"
+#     t = t_dict[list_name_t]
+
+#     list_name_x = f"{n}_bit_x"
+#     x = x_dict[list_name_x]
+
+#     g_vec = g_vec.float()
+#     mean = torch.mean(g_vec)
+#     std = torch.std(g_vec)
+#     normalized_g_vec = (g_vec - mean) / std
+    
+#     q_norm_g_vec = [estimate(t, x, value) for value in normalized_g_vec]
+
+#     q_g_vec = q_norm_g_vec * std + mean
+    
+#     return q_g_vec
     
