@@ -35,6 +35,7 @@ cifar-10-batches-py
 data/cifar10/*-python
 data/cifar100/*-python
 data/cinic10/
+data/FederatedEMNIST/datasets/
 
 data/cifar100/cifar-100-python.tar.gz.1
 data/fed_cifar100/datasets/fed_cifar100.tar.bz2.1

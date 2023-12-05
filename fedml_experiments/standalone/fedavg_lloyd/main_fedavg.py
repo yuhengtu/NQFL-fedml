@@ -32,10 +32,10 @@ from fedml_api.model.linear.lr import LogisticRegression
 from fedml_api.model.cv.resnet_gn import resnet18
 
 # 变0
-from fedml_api.standalone.fedavg_nqfl.fedavg_api import FedAvgAPI
-from fedml_api.standalone.fedavg_nqfl.my_model_trainer_classification import MyModelTrainer as MyModelTrainerCLS
-from fedml_api.standalone.fedavg_nqfl.my_model_trainer_nwp import MyModelTrainer as MyModelTrainerNWP
-from fedml_api.standalone.fedavg_nqfl.my_model_trainer_tag_prediction import MyModelTrainer as MyModelTrainerTAG
+from fedml_api.standalone.fedavg_lloyd.fedavg_api import FedAvgAPI
+from fedml_api.standalone.fedavg_lloyd.my_model_trainer_classification import MyModelTrainer as MyModelTrainerCLS
+from fedml_api.standalone.fedavg_lloyd.my_model_trainer_nwp import MyModelTrainer as MyModelTrainerNWP
+from fedml_api.standalone.fedavg_lloyd.my_model_trainer_tag_prediction import MyModelTrainer as MyModelTrainerTAG
 
 
 def add_args(parser):
@@ -298,7 +298,7 @@ if __name__ == "__main__":
     wandb.init(
         project="fedml",
     #变0
-        name="FedAVG_nqfl-r" + str(args.comm_round) + "-e" + str(args.epochs) + 
+        name="FedAVG_lloyd-r" + str(args.comm_round) + "-e" + str(args.epochs) + 
         "-lr" + str(args.lr) + "-bit" + str(args.quantized_bits) + "-" + str(args.dataset) + "-" + ("iid" if args.partition_method=='homo' else "noniid"),
         config=args
     )

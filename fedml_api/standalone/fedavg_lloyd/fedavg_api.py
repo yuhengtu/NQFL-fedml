@@ -8,7 +8,7 @@ import wandb
 import pandas as pd
 
 # 变0
-from fedml_api.standalone.fedavg_nqfl.client import Client
+from fedml_api.standalone.fedavg_lloyd.client import Client
 
 
 class FedAvgAPI(object):

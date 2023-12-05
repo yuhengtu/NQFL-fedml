@@ -5,82 +5,64 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
 
-import pickle
-file_name = "t_dict.pkl"
-with open(file_name, 'rb') as file:
-    t_dict = pickle.load(file)
-
-file_name = "x_dict.pkl"
-with open(file_name, 'rb') as file:
-    x_dict = pickle.load(file)
-
 def quantize(g_vec, input_compress_settings={}):
     compress_settings = {'n': 6} # 默认的压缩参数 6 bit
     compress_settings.update(input_compress_settings)
     n =  compress_settings['n'] 
     
-    list_name_t = f"{n}_bit_t"
-    t = torch.tensor(t_dict[list_name_t]).cuda()
+    g_vec = g_vec.float().cpu().numpy()
+    mean = np.mean(g_vec)
+    std = np.std(g_vec)
 
-    list_name_x = f"{n}_bit_x"
-    x = torch.tensor(x_dict[list_name_x]).cuda()
+    def gaussian(t):
+        return (1 / (std * np.sqrt(2 * np.pi))) * np.exp(-(t - mean)**2 / (2 * std**2))
 
-    g_vec = g_vec.float().cuda()
-    mean = torch.mean(g_vec)
-    std = torch.std(g_vec)
-    g_vec = (g_vec - mean) / std
+    # t表示区间划分点，thresholds
+    # x表示区间质心，centroid/level，t的长度比x少1（两端点为正负无穷）
+    def interval_MSE(x,t1,t2):
+        return integrate.quad(lambda t: ((t - x)**2) * gaussian(t), t1, t2)[0]
+    # quad 返回一个元组 (result, error)，其中 result 是数值积分的结果，而 error 是估计的误差
 
-    # t的长度比x少1
-    # def estimate(t, x, value):
-    #     for i in range(len(t)):
-    #         if t[i] > value:
-    #             return x[i]
-    #     return x[-1]
+    def MSE(t,x):
+        s = interval_MSE(x[0], -float('Inf'), t[0]) + interval_MSE(x[-1], t[-1], float('Inf'))
+        for i in range(1,len(x)-1):
+            s = s + interval_MSE(x[i], t[i-1], t[i])
+        return s
+
+    def centroid(t1,t2):
+        if integrate.quad(gaussian, t1, t2)[0] == 0 or t1 == t2:
+            return 0
+        else:
+            return integrate.quad(lambda t : t * gaussian(t), t1, t2)[0] / integrate.quad(gaussian, t1, t2)[0]
+
+    def maxlloyd(t, x):
+        for c in range(100):
+            # adjust levels
+            x[0] = centroid(-float('Inf'), t[0])
+            x[-1] = centroid(t[-1], float('Inf'))
+            for i in range(1,len(x)-1):
+                x[i] = centroid(t[i-1], t[i])
+            # adjust thresholds
+            for i in range(len(t)):
+                t[i] = 0.5 * ( x[i] + x[i+1] )
+        return t, x
+
+    m = 2 ** n + 2 ** (n) - 1 
+    interval = np.linspace(np.min(g_vec), np.max(g_vec), m)
+    x = interval[::2]  # 选择偶数下标项
+    t = interval[1::2]  # 选择奇数下标项
+    t2, x2 = maxlloyd(t, x)
+
+    t2 = torch.tensor(t2).cuda()
+    x2 = torch.tensor(x2).cuda()
+    g_vec = torch.tensor(g_vec).cuda()
     q_g_vec = torch.full_like(g_vec, x[-1])
     for i in range(len(t)-1, -1, -1):
         # torch.gt, a > b 返回true
-        mask = torch.gt(t[i], g_vec)
-        q_g_vec = torch.where(mask, x[i], q_g_vec)
-    
-    q_g_vec = q_g_vec * std + mean
-    
+        mask = torch.gt(t2[i], g_vec)
+        q_g_vec = torch.where(mask, x2[i], q_g_vec)
+
     return q_g_vec
-
-
-
-
-
-# t的长度比x少1
-# def estimate(t, x, value):
-#     for i in range(len(t)):
-#         if t[i] > value:
-#             return x[i]
-#     return x[-1]
-
-# def quantize(g_vec, input_compress_settings={}):
-#     compress_settings = {'n': 6} # 默认的压缩参数 6 bit
-#     compress_settings.update(input_compress_settings)
-#     n =  compress_settings['n']
-    
-#     list_name_t = f"{n}_bit_t"
-#     t = t_dict[list_name_t]
-
-#     list_name_x = f"{n}_bit_x"
-#     x = x_dict[list_name_x]
-
-#     g_vec = g_vec.float()
-#     mean = torch.mean(g_vec)
-#     std = torch.std(g_vec)
-#     normalized_g_vec = (g_vec - mean) / std
-    
-#     q_norm_g_vec = [estimate(t, x, value) for value in normalized_g_vec]
-
-#     q_g_vec = q_norm_g_vec * std + mean
-    
-#     return q_g_vec
-    
-
-
 
 
 

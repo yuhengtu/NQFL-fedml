@@ -31,7 +31,7 @@ class MyModelTrainer(ModelTrainer):
             d = self.grad_accum[i].reshape(-1).shape[0]
             # cur_cb = d * np.log2(q + 1) + d + 32
             # cur_cb = d * q + d + 32  # +d是符号位
-            cur_cb = d * q + 32 + 32 # +d是符号位
+            cur_cb = d * q + 32 * (2 ** q) # +d是符号位
             cb += cur_cb
         return cb
     

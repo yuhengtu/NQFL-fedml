@@ -16,7 +16,7 @@ def quantize(x, input_compress_settings={}):
 
     renormalize_p = torch.mul(p, 2 ** n)
     floor_p = torch.floor(renormalize_p) # 向下取整, 即公式中l
-    np.savetxt('floor_p.txt', floor_p.cpu().numpy())
+    # np.savetxt('floor_p.txt', floor_p.cpu().numpy())
 
     compare = torch.rand_like(floor_p) # 生成与 floor_p 同样形状的随机张量
 

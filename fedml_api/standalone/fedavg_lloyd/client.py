@@ -2,7 +2,7 @@ import logging
 import numpy as np
 
 #变0
-from fedml_api.standalone.fedavg_nqfl.nqfl_quant import *
+from fedml_api.standalone.fedavg_lloyd.lloyd_quant import *
 
 
 class Client:
@@ -27,7 +27,7 @@ class Client:
         self.local_sample_number = local_sample_number
 
 # 变1
-    def nqfl_quantize(self, gradients, q):
+    def lloyd_quantize(self, gradients, q):
         q_gradients = []
         print(f'-----------------gradients[0].shape:{gradients[0].shape}-----------------------------')
         np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
@@ -66,7 +66,7 @@ class Client:
         # weights = self.model_trainer.get_model_params()
         gradients = self.model_trainer.get_model_gradients()
         # 变2
-        q_gradients = self.nqfl_quantize(gradients, self.args.quantized_bits)
+        q_gradients = self.lloyd_quantize(gradients, self.args.quantized_bits)
         communication_bits = self.model_trainer.get_comm_bits(self.args.quantized_bits)
         return q_gradients, communication_bits
 
