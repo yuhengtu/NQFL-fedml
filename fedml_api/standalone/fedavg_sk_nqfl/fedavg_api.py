@@ -8,7 +8,7 @@ import wandb
 import pandas as pd
 
 # 变0
-from fedml_api.standalone.fedavg_sk.client import Client
+from fedml_api.standalone.fedavg_sk_nqfl.client import Client
 
 class FedAvgAPI(object):
     def __init__(self, dataset, device, args, model_trainer):
@@ -77,6 +77,10 @@ class FedAvgAPI(object):
                 quantized_bits = 2
             else:
                 quantized_bits = int(np.ceil(np.sqrt(global_loss[0] / global_loss[round_idx - 1]))) * 2
+                if quantized_bits < 2:
+                    quantized_bits = 2
+                if quantized_bits > 256:
+                    quantized_bits = 256
             
             print('*' * 50, 'round {}, s = 2**n = {}'.format(round_idx, quantized_bits))
             #
