@@ -56,7 +56,7 @@ def quantize(g_vec, input_compress_settings={}):
     t2 = torch.tensor(t2).cuda()
     x2 = torch.tensor(x2).cuda()
     g_vec = torch.tensor(g_vec).cuda()
-    q_g_vec = torch.full_like(g_vec, x[-1])
+    q_g_vec = torch.full_like(g_vec, x[-1]).cuda()
     for i in range(len(t)-1, -1, -1):
         # torch.gt, a > b 返回true
         mask = torch.gt(t2[i], g_vec)

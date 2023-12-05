@@ -40,7 +40,8 @@ class FedAvgAPI(object):
         logging.info("############setup_clients (END)#############")
 
     def train(self):
-        self.args.frequency_of_the_test = 1
+        #变
+        self.args.frequency_of_the_test = 20
         # w_global = self.model_trainer.get_model_params()
         w_global = self.model_trainer.get_model_params_cuda(self.device)
 

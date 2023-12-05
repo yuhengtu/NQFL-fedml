@@ -57,3 +57,11 @@ python3 ./main_fedavg.py \
 
 # cnn_femnist
 # nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 femnist ./../../../data/FederatedEMNIST/datasets cnn hetero 200 20 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &
+
+# rnn_shakespeare
+# nohup sh run_fedavg_standalone_pytorch.sh 0 3 3 10 shakespeare ./../../../data/shakespeare rnn homo 1000 50 0.03 adam 0 6 > ./fedavg_standalone.txt 2>&1 &
+
+
+
+# resnet18_gn + fed_cifar100
+# nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 fed_cifar100 ./../../../data/fed_cifar100/datasets resnet18_gn hetero 200 5 0.03 sgd 0 6 > ./fedavg_standalone.txt 2>&1 &

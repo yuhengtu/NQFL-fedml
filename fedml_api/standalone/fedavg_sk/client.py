@@ -1,5 +1,7 @@
 import logging
+import numpy as np
 
+#变0
 from fedml_api.standalone.fedavg_sk.qsgd import *
 
 
@@ -24,24 +26,39 @@ class Client:
         self.local_test_data = local_test_data
         self.local_sample_number = local_sample_number
 
+# 变
     def qsgd_quantize(self, gradients, q):
         q_gradients = []
-        for i in range(len(gradients)):
-            quantized_g = quantize(gradients[i], {'n': q})
-            q_gradients.append(quantized_g)
-        return q_gradients
 
-    
+        print(f'-----------------gradients[0].shape:{gradients[0].shape}-----------------------------')
+        np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
+        print(f'-----------------gradients[1]:{gradients[1]}-----------------------------')
+        print(f'-----------------gradients[1].shape:{gradients[1].shape}-----------------------------')
+        
+        for i in range(len(gradients)):
+            quantized_g = quantize(gradients[i], q)
+            q_gradients.append(quantized_g)
+
+        print(f'-----------------q_gradients[0].shape:{q_gradients[0].shape}-----------------------------')
+        np.savetxt('q_gradients_0.txt', q_gradients[0].cpu().numpy())
+        print(f'-----------------q_gradients[1]:{q_gradients[1]}-----------------------------')
+        print(f'-----------------q_gradients[1].shape:{q_gradients[1].shape}-----------------------------')
+
+        return q_gradients
 
     def get_sample_number(self):
         return self.local_sample_number
 
+#变
+    # def train(self, w_global):
     def train(self, w_global, quantized_bits):
         self.model_trainer.set_id(self.client_idx)
         self.model_trainer.set_model_params(w_global)
         self.model_trainer.train(self.local_training_data, self.device, self.args)
-        # weights = self.model_trainer.get_model_params()
         gradients = self.model_trainer.get_model_gradients()
+        #变
+        # q_gradients = self.qsgd_quantize(gradients, self.args.quantized_bits)
+        # communication_bits = self.model_trainer.get_comm_bits(self.args.quantized_bits)
         q_gradients = self.qsgd_quantize(gradients, quantized_bits)
         communication_bits = self.model_trainer.get_comm_bits(quantized_bits)
         return q_gradients, communication_bits

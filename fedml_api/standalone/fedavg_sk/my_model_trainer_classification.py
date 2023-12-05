@@ -24,18 +24,17 @@ class MyModelTrainer(ModelTrainer):
     def get_model_gradients(self):
         return self.grad_accum
     
+    #变
     def get_comm_bits(self, q):
         cb = 0
         for i in range(len(self.grad_accum)):
             d = self.grad_accum[i].reshape(-1).shape[0]
-            cur_cb = d * np.log2(q + 1) + d + 32
+            cur_cb = d * np.ceil(np.log2(q)) + d + 32
             cb += cur_cb
         return cb
     
-
     def train(self, train_data, device, args):
         model = self.model
-
         model.to(device)
         model.train()
 
@@ -50,66 +49,37 @@ class MyModelTrainer(ModelTrainer):
         epoch_loss = []
         # 初始化梯度累积的存储
         self.grad_accum = []
-        # 每轮epoch的梯度
-        grad_epoch = []
-        parameters = self.get_model_params_cuda(device)
-        for k, v in parameters.items():
-            self.grad_accum.append(torch.zeros_like(v.data, device=device))
-            grad_epoch.append(torch.zeros_like(v.data, device=device))
-        
-        # 所有轮的梯度
-        self.grad_total = None
+        # 变，与fedavg同，与qsgd不同
+        for param in self.model.parameters():
+            self.grad_accum.append(torch.zeros_like(param.data, device=device))
 
         for epoch in range(args.epochs):
             batch_loss = []
-            for t in grad_epoch:
-                t.zero_()
             for batch_idx, (x, labels) in enumerate(train_data):
                 x, labels = x.to(device), labels.to(device)
                 model.zero_grad()
                 log_probs = model(x)
                 loss = criterion(log_probs, labels)
-                # x.requires_grad = True
                 loss.backward()
 
-                # 梯度累积
-                for i, k in enumerate(parameters.keys()):
-                    # self.grad_accum[i].add_(list(self.model.parameters())[i].grad.data)
-                    if parameters[k].grad != None:
-                        grad_epoch[i].add_(parameters[k].grad.data)
+        # 变，与fedavg同，与qsgd不同
+                for i in range(len(list(self.model.parameters()))):
+                    self.grad_accum[i].add_(list(self.model.parameters())[i].grad.data)
             
                 # Uncommet this following line to avoid nan loss
                 # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
                 optimizer.step()
-                # for group in optimizer.param_groups:
-                #     for p in group['params']:
-                #         if p.grad is None:
-                #             continue
-                #         d_p = p.grad.data
-                #         p.data.add_(-group['lr'], d_p)
-
-                # logging.info('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                #     epoch, (batch_idx + 1) * args.batch_size, len(train_data) * args.batch_size,
-                #            100. * (batch_idx + 1) / len(train_data), loss.item()))
                 batch_loss.append(loss.item())
-            
-            for i, k in enumerate(parameters.keys()):
-                if parameters[k].grad != None:
-                    grad_epoch[i].div_(len(train_data))
-                    self.grad_accum[i].add_(grad_epoch[i].data)
-            
-            grad_cur = grad_epoch[0].reshape(-1)
-            for i in range(1, len(parameters.keys())):
-                grad_cur = torch.cat((grad_cur, grad_epoch[i].reshape(-1)))
-            if self.grad_total is None:
-                self.grad_total = grad_cur.unsqueeze(0)
-            else:
-                self.grad_total = torch.cat((self.grad_total, grad_cur.unsqueeze(0)))
+
+        # 变，与fedavg同，与qsgd不同
 
             epoch_loss.append(sum(batch_loss) / len(batch_loss))
+
             logging.info('Client Index = {}\tEpoch: {}\tLoss: {:.6f}'.format(
                 self.id, epoch, sum(epoch_loss) / len(epoch_loss)))  
+
+
 
     def test(self, test_data, device, args):
         model = self.model

@@ -30,7 +30,7 @@ class Client:
     def lloyd_quantize(self, gradients, q):
         q_gradients = []
         print(f'-----------------gradients[0].shape:{gradients[0].shape}-----------------------------')
-        np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
+        # np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
         # 权重的梯度
         # [10， 784]，（lr模型，28^2 = 784个参数）
         # 输入特征的维度为 n，输出特征的维度为 m，则该层的参数矩阵的形状为 (m,n)
@@ -48,7 +48,7 @@ class Client:
             quantized_g = quantize(gradients[i], {'n': q})
             q_gradients.append(quantized_g)
         print(f'-----------------q_gradients[0].shape:{q_gradients[0].shape}-----------------------------')
-        np.savetxt('q_gradients_0.txt', q_gradients[0].cpu().numpy())
+        # np.savetxt('q_gradients_0.txt', q_gradients[0].cpu().numpy())
         print(f'-----------------q_gradients[1]:{q_gradients[1]}-----------------------------')
         print(f'-----------------q_gradients[1].shape:{q_gradients[1].shape}-----------------------------')
 
