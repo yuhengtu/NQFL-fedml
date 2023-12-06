@@ -1,6 +1,8 @@
-# run
+# Environment
 Comment unnecessary parts and run install.sh
 
+
+# Run
 Take nqfl for example
 ```
 cd ./fedml_experiments/standalone/fedavg_nqfl
@@ -19,17 +21,14 @@ nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 femnist ./../../../data/Fed
 ```
 
 
-# algorithm
-fedavg_qsgd is [QSGD](https://arxiv.org/pdf/1610.02132.pdf)
-
-fedavg_lloyd is [DFL](https://arxiv.org/pdf/2303.08423.pdf)
-
-fedavg_sk is [AdaQuantFL](https://arxiv.org/pdf/2102.04487.pdf)
-
-fedavg_nqfl and fedavg_sk_nqfl are ours
+# Algorithm
+- fedavg_qsgd is [QSGD](https://arxiv.org/pdf/1610.02132.pdf)
+- fedavg_lloyd is [DFL](https://arxiv.org/pdf/2303.08423.pdf)
+- fedavg_sk is [AdaQuantFL](https://arxiv.org/pdf/2102.04487.pdf)
+- fedavg_nqfl and fedavg_sk_nqfl are ours
 
 
-# result
+# Result
 https://wandb.ai/yuhengtu/fedml/overview?workspace=user-yuhengtu
 
 
