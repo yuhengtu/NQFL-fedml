@@ -36,7 +36,7 @@ data/cifar10/*-python
 data/cifar100/*-python
 data/cinic10/
 data/FederatedEMNIST/datasets/
-data/fed_cifar100/datasets
+data/fed_cifar100/datasets/
 
 data/cifar100/cifar-100-python.tar.gz.1
 data/fed_cifar100/datasets/fed_cifar100.tar.bz2.1
@@ -67,3 +67,6 @@ data/fednlp/*
 
 # test_qsgd.py
 # nqfl_test.py
+
+fedml_experiments/standalone/fedavg_sk_femnist/
+fedml_experiments/standalone/fedavg_sk_nqfl_femnist/

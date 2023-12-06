@@ -41,7 +41,7 @@ class FedAvgAPI(object):
 
     def train(self):
         #变
-        self.args.frequency_of_the_test = 20
+        self.args.frequency_of_the_test = 1
         # w_global = self.model_trainer.get_model_params()
         w_global = self.model_trainer.get_model_params_cuda(self.device)
 

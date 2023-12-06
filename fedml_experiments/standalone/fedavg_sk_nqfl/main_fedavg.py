@@ -32,6 +32,7 @@ from fedml_api.model.linear.lr import LogisticRegression
 from fedml_api.model.cv.resnet_gn import resnet18
 
 # 变0
+from fedml_api.model.cv.cnn_cifar10 import cnn_cifar10
 from fedml_api.standalone.fedavg_sk_nqfl.fedavg_api import FedAvgAPI
 from fedml_api.standalone.fedavg_sk_nqfl.my_model_trainer_classification import MyModelTrainer as MyModelTrainerCLS
 from fedml_api.standalone.fedavg_sk_nqfl.my_model_trainer_nwp import MyModelTrainer as MyModelTrainerNWP
@@ -249,6 +250,11 @@ def create_model(args, model_name, output_dim):
     elif model_name == "cnn" and args.dataset == "mnist":
         logging.info("CNN + MNIST")
         model = CNN_OriginalFedAvg(True)
+
+    elif model_name == "cnn" and args.dataset == "cifar10":
+        logging.info("CNN + CIFAR10")
+        model = cnn_cifar10()
+
     elif model_name == "cnn" and args.dataset == "femnist":
         logging.info("CNN + FederatedEMNIST")
         model = CNN_DropOut(False)

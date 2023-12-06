@@ -31,7 +31,7 @@ class Client:
         q_gradients = []
 
         print(f'-----------------gradients[0].shape:{gradients[0].shape}-----------------------------')
-        np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
+        # np.savetxt('gradients_0.txt', gradients[0].cpu().numpy())
         print(f'-----------------gradients[1]:{gradients[1]}-----------------------------')
         print(f'-----------------gradients[1].shape:{gradients[1].shape}-----------------------------')
         
@@ -40,7 +40,7 @@ class Client:
             q_gradients.append(quantized_g)
 
         print(f'-----------------q_gradients[0].shape:{q_gradients[0].shape}-----------------------------')
-        np.savetxt('q_gradients_0.txt', q_gradients[0].cpu().numpy())
+        # np.savetxt('q_gradients_0.txt', q_gradients[0].cpu().numpy())
         print(f'-----------------q_gradients[1]:{q_gradients[1]}-----------------------------')
         print(f'-----------------q_gradients[1].shape:{q_gradients[1].shape}-----------------------------')
 
