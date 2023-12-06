@@ -33,6 +33,6 @@ https://wandb.ai/yuhengtu/fedml/overview?workspace=user-yuhengtu
 
 
 # Reference
-[Fedml](https://github.com/FedML-AI/FedML)
-[lloyd-max alogrithm](https://github.com/JosephChataignon/Max-Lloyd-algorithm/blob/master/1%20dimension/max_lloyd_1D.py)
+- [Fedml](https://github.com/FedML-AI/FedML)
+- [lloyd-max alogrithm](https://github.com/JosephChataignon/Max-Lloyd-algorithm/blob/master/1%20dimension/max_lloyd_1D.py)
 
