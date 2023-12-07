@@ -23,9 +23,9 @@ nohup sh run_fedavg_standalone_pytorch.sh 0 10 10 10 femnist ./../../../data/Fed
 
 # Algorithm
 - fedavg_qsgd is [QSGD](https://arxiv.org/pdf/1610.02132.pdf)
-- fedavg_lloyd is [DFL](https://arxiv.org/pdf/2303.08423.pdf)
+- fedavg_lloyd is [SLMQ(standard lloyd-max quantization)](https://arxiv.org/pdf/2303.08423.pdf)
 - fedavg_sk is [AdaQuantFL](https://arxiv.org/pdf/2102.04487.pdf)
-- fedavg_nqfl and fedavg_sk_nqfl are ours
+- fedavg_nqfl(NQFL) and fedavg_sk_nqfl(AdaQuantFL+NQFL) are ours
 
 
 # Result
